@@ -4,7 +4,6 @@ read data in different type files
 import os
 import pandas as pd
 
-from functools import singledispatch
 from PIL import Image
 
 
@@ -19,8 +18,10 @@ class FileReader:
     def read_file(filepath: str) -> list:
         """
         read data in single file: csv, xlsx, txt, jpg, png
-        :param filepath: str
-        :return: data
+        :param filepath:
+            a filepath
+        :return: list
+            data in file
         """
         folder_path, filetype = filepath.split('.')
         if filetype == 'csv':
@@ -42,7 +43,9 @@ class FileReader:
         """
         read data in a folder: csv, xlsx, txt, jpg, png
         :param folder:
-        :return: data: list
+            path of folder which need read
+        :return: list
+            list of data in single file
         """
         all_file_list = os.listdir(folder)
         folder_data = []
