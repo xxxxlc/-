@@ -4,5 +4,4 @@
 
 
 
-贝叶斯分类器理论基础
-
+[贝叶斯分类器理论基础 | xxxxlc](https://xxxxlc.github.io/2022/01/17/bei-xie-si-fen-lei-qi-li-lun-ji-chu/)
