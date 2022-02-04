@@ -8,7 +8,7 @@ import numpy as np
 from PIL import Image
 
 
-class FileReader:
+class FileReader(object):
     """
     read data come from different types' files
     """
