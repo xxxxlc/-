@@ -28,3 +28,8 @@
 |  10  |     0     |     1     |     1     |     0     |     1      |
 
 该问题是一个典型的分类问题，可以使用朴素贝叶斯分类器判断具有以上特征的邮件是否为垃圾邮件
+
+[邮件分类问题](https://github.com/xxxxlc/Machine-Learning/blob/main/ML_tensorflow/Naive_Bayes_Classifier/example/mail.py)
+
+
+
