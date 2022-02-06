@@ -25,6 +25,7 @@ class NaiveBayesClassifier(object):
     function:
         Currently supported discrete feature variables
     """
+
     def __init__(self, train_data, train_label, test_data=None, test_label=None) -> None:
         """
         build train and test dataset,
@@ -69,15 +70,25 @@ class NaiveBayesClassifier(object):
             self.X_features[i] = feature_num
 
         # initial priori probability
+        # self.y_num_priori record number of y_i
+        # self.p_priori record priori probability of y_i
+        self.y_num_priori = np.zeros(self.Y_num)
         self.p_priori = np.zeros(self.Y_num)
 
         # initial conditional probability
         # every feature has condition probability table
         # due to difference of feature, the size of table is different
+        # self.num_condition record matrix of (xi | y_i)
+        # self.p_condition record condition probability of (xi | y_i)
+        self.num_condition = None
         self.p_condition = list()
         for feature in range(self.train_data.shape[1]):
             p_condition_table = np.zeros((int(self.X_features[i]), self.Y_num))
             self.p_condition.append(p_condition_table)
+
+        # After laplace_smoothing
+        # self.laplace_p_priori = np.zeros(self.Y_num)
+        # self.laplace_p_condition = copy.deepcopy(self.p_condition)
 
     def train(self) -> None:
         """
@@ -96,34 +107,46 @@ class NaiveBayesClassifier(object):
         # initial number of y1...yn
         matrix_num = copy.deepcopy(self.p_condition)
 
-        # the total number of events yi occurred
-        # + self.Y_num: Laplace smoothing
-        y_num = np.zeros(self.Y_num)
-
         # compute number of y_i in different events
         for i in range(sample_num):
             label = self.train_label[i]
             data = self.train_data[i]
 
             # compute total number of y_i
-            self.p_priori[label] += 1
+            self.y_num_priori[label] += 1
 
             # compute y_i conditional number
             for feature in range(0, feature_num):
                 matrix_num[feature][data[feature], label] += 1
 
-            # compute total number of y_i
-            y_num[label] += 1
-
         # compute y_i priori probability
-        self.p_priori = self.p_priori / sample_num
+        self.p_priori = self.y_num_priori / sample_num
+
+        # record matrix of (xi | y_i)
+        self.num_condition = matrix_num
 
         # compute y_i condition probability
         for feature in range(feature_num):
             for y_i in range(self.Y_num):
-                self.p_condition[feature][:, y_i] = matrix_num[feature][:, y_i] / y_num[y_i]
+                self.p_condition[feature][:, y_i] = matrix_num[feature][:, y_i] / self.y_num_priori[y_i]
 
         self.train_y_pred = self.classify(self.train_data)[:, 1]
+
+    def laplace_smoothing(self):
+        """
+        Laplace_smoothing:
+            priori probability: P(y_i) = (N_i + 1) / (N_i + K)
+            condition probability: P(x_i|y_i) = (N_ij + 1) / (N_i + S_j)
+        :return:
+        """
+        sample_num = self.train_data.shape[0]
+        self.p_priori = (self.y_num_priori + 1) / (sample_num + self.Y_num)
+
+        feature_num = self.train_data.shape[1]
+        for feature in range(feature_num):
+            for y_i in range(self.Y_num):
+                self.p_condition[feature][:, y_i] = ((self.num_condition[feature][:, y_i] + 1) /
+                                                     (self.y_num_priori[y_i] + len(self.num_condition[feature])))
 
     def classify_one(self, data: list, out: bool = False) -> [float, int]:
         """
@@ -178,7 +201,6 @@ class NaiveBayesClassifier(object):
 
 
 if __name__ == '__main__':
-
     datapath = 'D:\\workplace\\ML\\ML_tensorflow\\Naive_Bayes_Classifier\\datasample\\mail.xlsx'
     df = pd.read_excel(datapath)
     category = df.columns
@@ -188,12 +210,7 @@ if __name__ == '__main__':
 
     a = NaiveBayesClassifier(X, y)
     a.train()
-    a.classify_one([0, 1, 1, 0])
+    a.classify_one([1, 1, 1, 1], True)
+    a.laplace_smoothing()
+    a.classify_one([1, 1, 1, 1], True)
     a.evaluation(a.train_label, a.train_y_pred)
-
-
-
-
-
-
-
