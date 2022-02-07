@@ -20,3 +20,6 @@ a.classify_one([1, 1, 1, 1], True)
 a.laplace_smoothing()
 a.classify_one([1, 1, 1, 1], True)
 a.evaluation(a.train_label, a.train_y_pred)
+
+a.train_skl('MNB')
+a.evaluation(a.train_label, a.train_y_pred)
