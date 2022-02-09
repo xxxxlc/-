@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from ML_tensorflow.Naive_Bayes_Classifier.NaiveBayesClassifier import NaiveBayesClassifier
+from ML_tensorflow.Naive_Bayes_Classifier.AODE import AODE
 
 data_path = 'D:\\workplace\\ML\\ML_tensorflow\\Naive_Bayes_Classifier\\datasample\\mail.xlsx'
 df = pd.read_excel(data_path)
@@ -23,3 +24,7 @@ a.evaluation(a.train_label, a.train_y_pred)
 
 a.train_skl('MNB')
 a.evaluation(a.train_label, a.train_y_pred)
+
+b = AODE(X, y)
+y_pred = b.classify(X)
+b.evaluation(y, y_pred[:, 1])
