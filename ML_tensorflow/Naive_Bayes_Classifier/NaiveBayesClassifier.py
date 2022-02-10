@@ -4,18 +4,12 @@ Naive Bayes Classifier
 import math
 
 import numpy as np
-import pandas as pd
 import copy
 
-from ML_tensorflow.dataloader.loader import Loader
-from ML_tensorflow.evaluator.evaluator import Evaluator
-from sklearn.preprocessing import RobustScaler
-from sklearn.naive_bayes import GaussianNB
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.naive_bayes import BernoulliNB
+from ML_tensorflow.Naive_Bayes_Classifier.NBC import NBC
 
 
-class NaiveBayesClassifier(object):
+class NaiveBayesClassifier(NBC):
     """
     Base Naive Bayes Classifier
     function:
@@ -54,19 +48,7 @@ class NaiveBayesClassifier(object):
         :param test_data:
         :param test_label:
         """
-
-        # test and train dataset
-        self.train_data = train_data
-        self.train_label = train_label
-        self.test_data = test_data
-        self.test_label = test_label
-
-        self.test_y_pred = None
-        self.train_y_pred = None
-
-        # Number of Y_categories
-        categories = list(set(train_label))
-        self.Y_num = len(categories)
+        super(NaiveBayesClassifier, self).__init__(train_data, train_label, test_data, test_label)
 
         # separate discrete feature variables and continuous feature variables
         self.variable_type = np.zeros(self.train_data.shape[1])
@@ -226,50 +208,3 @@ class NaiveBayesClassifier(object):
 
         return res
 
-    def test(self):
-        """
-        classify test dataset
-        :return:
-        """
-        if not self.test_data:
-            raise AttributeError('the test dataset has not load')
-
-        self.test_y_pred = self.classify(self.test_data)
-
-    @staticmethod
-    def evaluation(y_test, y_pred):
-        evaluator = Evaluator(y_test, y_pred)
-        print(evaluator.classify_evaluation())
-
-    @staticmethod
-    def dct_or_cnt(data: list) -> bool:
-        """
-        return feature is discrete or continuous
-        :param data:
-        :return: bool
-        """
-        category = set(data)
-        for num in category:
-            if int(num) != num:
-                return False
-        return True
-
-    def train_skl(self, function_type='GNB'):
-        if function_type == 'MNB':
-            trainer = MultinomialNB()
-        elif function_type == 'BNB':
-            trainer = BernoulliNB()
-        else:
-            trainer = GaussianNB()
-
-        classifier = trainer.fit(self.train_data, self.train_label)
-        if self.test_data:
-            self.test_y_pred = classifier.predict(self.test_data)
-        self.train_y_pred = classifier.predict(self.train_data)
-
-        print('--------------------')
-        print('sklearn have completed training')
-
-
-if __name__ == '__main__':
-    pass

@@ -7,6 +7,9 @@ import numpy as np
 
 from ML_tensorflow.trainer.trainer import Trainer
 from ML_tensorflow.evaluator.evaluator import Evaluator
+from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.naive_bayes import BernoulliNB
 
 
 class NBC(Trainer):
@@ -15,7 +18,19 @@ class NBC(Trainer):
     """
     def __init__(self, train_data, train_label, test_data=None, test_label=None):
         """
-        initial function
+        build train and test dataset
+        ----------------------------------
+        discrete feature variables:
+            input label data must be list of integer:
+            for example:
+                two labels: [0, 1]
+                three labels: [0, 1, 2]
+            as same as feature:
+                two features: [0, 1]
+                three features: [0, 1, 2]
+        continuous feature variables:
+            input label data must be constructed in [0, 1]
+        ----------------------------------
         :param train_data:
         :param train_label:
         :param test_data:
@@ -40,7 +55,7 @@ class NBC(Trainer):
         # initialize conditional probability
         self.p_condition = None
 
-    def classify(self, data: list) -> list:
+    def classify(self, data: list) -> None:
         """
         return a group of data result of classification
         :param data:
@@ -58,9 +73,45 @@ class NBC(Trainer):
 
         self.test_y_pred = self.classify(self.test_data)
 
+    def train_skl(self, function_type='GNB'):
+        if function_type == 'MNB':
+            trainer = MultinomialNB()
+        elif function_type == 'BNB':
+            trainer = BernoulliNB()
+        else:
+            trainer = GaussianNB()
+
+        classifier = trainer.fit(self.train_data, self.train_label)
+        if self.test_data:
+            self.test_y_pred = classifier.predict(self.test_data)
+        self.train_y_pred = classifier.predict(self.train_data)
+
+        print('--------------------')
+        print('sklearn have completed training')
+
+    @staticmethod
+    def dct_or_cnt(data: list) -> bool:
+        """
+        return feature is discrete or continuous
+        :param data:
+        :return: bool
+        """
+        category = set(data)
+        for num in category:
+            if int(num) != num:
+                return False
+        return True
+
     @staticmethod
     def evaluation(y_test, y_pred):
+        """
+        output evaluation of classifier
+        :param y_test: ture label
+        :param y_pred: predict label
+        :return:
+        """
         evaluator = Evaluator(y_test, y_pred)
         print(evaluator.classify_evaluation())
+
 
 
