@@ -61,12 +61,12 @@ class AODE(NBC):
         """
         num_xj_yi_xi = 0
         for i in range(len(self.idx_yi[y_i])):
-            sample = self.train_data[i]
+            sample = self.train_data[self.idx_yi[y_i][i]]
 
             if sample[index_i] == x_i and sample[index_j] == x_j:
                 num_xj_yi_xi += 1
-        prob = (self.y_i_x_i[y_i, index_i, x_i] + self.X_features[index_j]) / \
-               (num_xj_yi_xi + 1)
+        prob = (num_xj_yi_xi + 1) / \
+               (self.y_i_x_i[y_i, index_i, x_i] + self.X_features[index_j])
 
         return prob
 
@@ -79,11 +79,9 @@ class AODE(NBC):
         for i in range(len(data)):
             p = (self.y_i_x_i[y_i, i, data[i]] + 1) / \
                 (self.train_data.shape[0] + self.X_features[i])
-            p1 = 0
+            p1 = 1
             for j in range(len(data)):
-                if i == j:
-                    continue
-                p1 += math.log10(self.condition_probability(i, data[i], j, data[j], y_i))
+                p1 *= self.condition_probability(i, data[i], j, data[j], y_i)
             # P(y_i|x) = sum(P(y_i) * P(xi|y_i, xj))
             prob += p * p1
 
