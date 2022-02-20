@@ -1,9 +1,9 @@
 """
 Base Classifier of Naive Bayes Classifier
-the aim is that reduce overlap code
 """
 
 import numpy as np
+import math
 
 from ML_tensorflow.trainer.trainer import Trainer
 from ML_tensorflow.evaluator.evaluator import Evaluator
@@ -16,7 +16,7 @@ class NBC(Trainer):
     """
     Base Classifier of Naive Bayes Classifier
     """
-    def __init__(self, train_data, train_label, test_data=None, test_label=None):
+    def __init__(self, train_data, train_label, test_data=None, test_label=None, dis_index=None, cont_index=None):
         """
         build train and test dataset
         ----------------------------------
@@ -30,7 +30,12 @@ class NBC(Trainer):
                 three features: [0, 1, 2]
         continuous feature variables:
             input label data must be constructed in [0, 1]
-        ----------------------------------
+        ----------------------------------------------
+        sklearn:
+        1. Multinomial Naive Bayes Classifier
+        2. Bernoulli Naive Bayes Classifier
+        3. Gaussian Naive Bayes Classifier
+
         :param train_data:
         :param train_label:
         :param test_data:
@@ -38,11 +43,17 @@ class NBC(Trainer):
         """
         super(NBC, self).__init__(train_data, train_label, test_data, test_label)
 
+        # discrete and continuous variables
+        self.dis_index = dis_index
+        self.cont_index = cont_index
+
         # record number of yi
         self.Y_num = len(set(self.train_label))
 
+        # record index of  label is y_i
         # record number of each label
         # initialize priori probability
+        self.y_i_idx = None
         self.y_i_num = None
         self.p_priori = None
 
@@ -52,16 +63,113 @@ class NBC(Trainer):
             feature_num = len(set(self.train_data[:, i]))
             self.X_features[i] = feature_num
 
-        # initialize conditional probability
-        self.p_condition = None
+    def priori_prob(self):
+        """
+        compute priori probability
+        P(y_i)
+        :return:
+        """
+        # initialize counter of yi idx
+        self.y_i_idx = list()
 
-    def classify(self, data: list) -> None:
+        for i in range(self.Y_num):
+            self.y_i_idx.append([])
+
+        # initialize counter of yi num
+        self.y_i_num = np.zeros(self.Y_num)
+
+        # initialize priori probability
+        self.p_priori = np.zeros(self.Y_num)
+
+        for i in range(self.train_data.shape[0]):
+            label = int(self.train_label[i])
+
+            self.y_i_num[label] += 1
+            self.y_i_idx[label].append(i)
+
+        # Laplace_smoothing:
+        # priori probability: P(y_i) = (N_i + 1) / (N_i + K)
+        self.p_priori = (self.y_i_num + 1) / (self.train_data.shape[0] + self.Y_num)
+
+    def cond_prob_dis(self, x_i, index, y_i):
+        """
+        discrete variables
+        compute condition probability
+        :return:
+        """
+        num_xi = 0
+        for idx in self.y_i_idx[y_i]:
+            if self.train_data[idx, index] == x_i:
+                num_xi += 1
+        prob = (num_xi + 1) / \
+               (self.y_i_num[y_i] + self.X_features[index])
+        return prob
+
+    def cond_prod_cont(self, x_i, index, y_i):
+        """
+        continuous variables
+        compute condition probability
+        :return:
+        """
+        sample = self.train_data[self.y_i_idx[y_i], index]
+        mu = np.average(sample)
+        sigma = np.std(sample)
+
+        prob = (1 / (math.sqrt(2 * math.pi)) *
+                math.exp(-((x_i - mu) ** 2) / sigma))
+
+        return prob
+
+    def posterior_prob(self, data, y_i):
+        """
+        compute posterior probability
+        P(y_i|X)
+        :param data:
+        :param y_i:
+        :return:
+        """
+
+        prob = self.p_priori[y_i]
+        for i in self.dis_index:
+            prob *= self.cond_prob_dis(data[i], i, y_i)
+        for i in self.cont_index:
+            prob *= self.cond_prod_cont(data[i], i, y_i)
+
+        return prob
+
+    def argmax_p(self, data):
+        """
+        compute all P(y|x)
+        select max P(y|x)
+        :param data:
+        :return:
+        """
+        if len(data) != len(self.X_features):
+            raise AttributeError('number of features is error')
+
+        if self.y_i_idx is None:
+            self.priori_prob()
+
+        # record posterior probability of each y_i
+        p_y_x = np.zeros(self.Y_num)
+        for y_i in range(self.Y_num):
+            # compute P(y_i|c) posterior probability
+            p_y_x[y_i] = self.posterior_prob(data, y_i)
+
+        return p_y_x[np.argmax(p_y_x)], np.argmax(p_y_x)
+
+    def classify(self, data: list) -> list:
         """
         return a group of data result of classification
         :param data:
         :return:
         """
-        return None
+        sample_num = data.shape[0]
+        res = np.zeros((sample_num, 2))
+        for i in range(sample_num):
+            res[i, 0], res[i, 1] = self.argmax_p(data[i, :])
+
+        return res
 
     def test(self):
         """

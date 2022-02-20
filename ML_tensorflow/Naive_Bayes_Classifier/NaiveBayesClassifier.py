@@ -1,5 +1,7 @@
 """
 Naive Bayes Classifier
+this model speed of calculation is faster
+it can complete whole matrix of probability in a loop
 """
 import math
 
@@ -11,15 +13,10 @@ from ML_tensorflow.Naive_Bayes_Classifier.NBC import NBC
 
 class NaiveBayesClassifier(NBC):
     """
-    Base Naive Bayes Classifier
+    Naive Bayes Classifier
     function:
         supported discrete feature variables
         supported continuous feature variables
-        ----------------------------------------------
-        sklearn:
-        1. Multinomial Naive Bayes Classifier
-        2. Bernoulli Naive Bayes Classifier
-        3. Gaussian Naive Bayes Classifier
     """
 
     def __init__(self, train_data, train_label, test_data=None, test_label=None) -> None:
@@ -113,7 +110,7 @@ class NaiveBayesClassifier(NBC):
 
         # compute discrete variables number of y_i in different events
         for i in range(sample_num):
-            label = self.train_label[i]
+            label = int(self.train_label[i])
             data = self.train_data[i]
 
             # compute total number of y_i
@@ -130,7 +127,8 @@ class NaiveBayesClassifier(NBC):
                     list_y_i[label].append(data[feature])
 
         # compute y_i priori probability
-        self.p_priori = self.y_num_priori / sample_num
+        # priori probability: P(y_i) = (N_i + 1) / (N_i + K)
+        self.p_priori = (self.y_num_priori + 1) / (sample_num + self.Y_num)
 
         # record discrete variables matrix of (xi | y_i)
         self.num_condition = matrix_num
@@ -139,33 +137,18 @@ class NaiveBayesClassifier(NBC):
         for feature in range(feature_num):
             for y_i in range(self.Y_num):
                 if self.variable_type[feature]:
-                    self.p_condition[feature][:, y_i] = matrix_num[feature][:, y_i] / self.y_num_priori[y_i]
+                    # condition probability: P(x_i|y_i) = (N_ij + 1) / (N_i + S_j)
+                    self.p_condition[feature][:, y_i] = ((self.num_condition[feature][:, y_i] + 1) /
+                                                         (self.y_num_priori[y_i] + len(self.num_condition[feature])))
                 else:
                     # compute variance and mean of continuous feature variables
-                    array = np.array(list_y_i[feature])
+                    array = np.array(list_y_i[y_i])
                     self.mu[feature, y_i] = np.mean(array)
                     self.sigma[feature, y_i] = np.var(array)
                     self.p_condition[feature][0, y_i] = self.mu[feature, y_i]
                     self.p_condition[feature][1, y_i] = self.sigma[feature, y_i]
 
         self.train_y_pred = self.classify(self.train_data)[:, 1]
-
-    def laplace_smoothing(self):
-        """
-        Laplace_smoothing:
-            priori probability: P(y_i) = (N_i + 1) / (N_i + K)
-            condition probability: P(x_i|y_i) = (N_ij + 1) / (N_i + S_j)
-        :return:
-        """
-        sample_num = self.train_data.shape[0]
-        self.p_priori = (self.y_num_priori + 1) / (sample_num + self.Y_num)
-
-        feature_num = self.train_data.shape[1]
-        for feature in range(feature_num):
-            for y_i in range(self.Y_num):
-                if self.variable_type[feature]:
-                    self.p_condition[feature][:, y_i] = ((self.num_condition[feature][:, y_i] + 1) /
-                                                         (self.y_num_priori[y_i] + len(self.num_condition[feature])))
 
     def classify_one(self, data: list, out: bool = False) -> [float, int]:
         """
@@ -193,7 +176,7 @@ class NaiveBayesClassifier(NBC):
             for i in range(self.Y_num):
                 print(outfmt.format(i, p[i]))
 
-        return value, idx
+        return value, int(idx)
 
     def classify(self, data: list) -> list:
         """

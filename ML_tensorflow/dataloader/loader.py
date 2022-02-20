@@ -93,6 +93,66 @@ class Loader(object):
         data, label = zip(*temp)
         return data, label
 
+    def discrete_processor(self, data, features=None):
+        """
+        normalize discrete Data
+        :param data:
+        :param features:
+        :return:
+        """
+        if not features:
+            dis, con = self.type_data(data)
+            features = dis
+
+        sample = len(data)
+        name_dic = list()
+
+        if len(data.shape) == 1:
+            res = np.zeros(sample)
+            category = list(set(data))
+            name_dic.append(category)
+            for j in range(sample):
+                res[j] = category.index(data[j])
+
+            return res, name_dic
+
+        for i in features:
+            category = list(set(data[:, i]))
+            name_dic.append(category)
+
+            for j in range(sample):
+                data[j, i] = category.index(data[j, i])
+
+        return data, name_dic
+
+    @staticmethod
+    def continuous_processor():
+        pass
+
+    @staticmethod
+    def type_data(data):
+        """
+        determine whether the datatype is discrete or continuous
+        :param data: array
+        :return: (list, list)
+        """
+        features = len(data[0])
+        discrete = []
+        continuous = []
+
+        for i in range(features):
+            sample = data[0]
+            if isinstance(sample[i], float):
+                continuous.append(i)
+            else:
+                discrete.append(i)
+
+        return discrete, continuous
+
+
+
+
+
 
 if __name__ == "__main__":
     # path = 'D:\\workplace\\ML\\ML_tensorflow\\dataloader\\datasample\\A_pre.csv'

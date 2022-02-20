@@ -6,6 +6,14 @@
 
 [贝叶斯分类器理论基础 | xxxxlc](https://xxxxlc.github.io/2022/01/17/bei-xie-si-fen-lei-qi-li-lun-ji-chu/)
 
+- 朴素贝叶斯分类器
+  - 高斯贝叶斯
+  - 多项式贝叶斯
+  - 伯努利贝叶斯
+- 半朴素贝叶斯分类器
+  - AODE
+  - TAN
+
 
 
 ## Example

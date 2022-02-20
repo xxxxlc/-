@@ -78,6 +78,31 @@ class FileReader(object):
         """
         pass
 
+    @staticmethod
+    def read_excel(data_path):
+        """
+        read all data from one excel
+        dataset is arranged as follow:
+        -----------------------------
+        |1|     data     | label |
+        |2|              |       |
+        |3|              |       |
+        |4|              |       |
+        -----------------------------
+        in other other, label is on end of columns
+        :param data_path:
+        :return:
+        """
+        df = pd.read_excel(data_path)
+        category = df.columns
+        # X includes data except first(serial number) and last(label)
+        X = np.array(df.drop([category[0], category[-1]], axis=1))
+
+        # label is on last
+        y = np.array(df[category[-1]])
+
+        return X, y
+
 
 if __name__ == "__main__":
     pass
