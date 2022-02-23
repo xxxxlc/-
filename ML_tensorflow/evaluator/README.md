@@ -52,4 +52,5 @@ pre_recall_f1 --> f1_score
 
 一般来说，查准率与查全率相互矛盾，若希望所有的正例都被预测出来，那么会增加被预测为正例的数量，那么正确预测的比例就会降低。而要增加正确预测的比例，那么在预测方面就会更加谨慎，预测为正例的数量就会变少，就会漏掉一些正例样本
 
-<img src="README/evaluator_classify_confusion_matrix.png" alt="1" style="zoom: 25%;" />
+![](.\img\evaluator_classify_confusion_matrix.png)
+

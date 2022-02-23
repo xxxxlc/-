@@ -13,6 +13,8 @@
 - 半朴素贝叶斯分类器
   - AODE
   - TAN
+  - 贝叶斯网络
+    - 运用pytorch中的pgmpy
 
 
 
@@ -40,4 +42,14 @@
 [邮件分类问题](https://github.com/xxxxlc/Machine-Learning/blob/main/ML_tensorflow/Naive_Bayes_Classifier/example/mail.py)
 
 
+
+### 西瓜分类问题
+
+取自周志华老师的《机器学习》，根据西瓜特征判断该西瓜是否好瓜
+
+
+
+### 泰坦尼克号存活问题
+
+数据来源：[Titanic - Machine Learning from Disaster | Kaggle](https://www.kaggle.com/c/titanic/overview)
 

@@ -1,9 +1,13 @@
 """
 build evaluator to evaluate result of machine learning
 """
-
+import numpy as np
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
+from ML_tensorflow.plot.plot import Plot
 
 
 class Evaluator(object):
@@ -22,6 +26,7 @@ class Evaluator(object):
 
         res = '----------------------\n'
         res += self.accuracy(self.y_test, self.y_pred)
+        res += self.precision_recall_f1(self.y_test, self.y_pred)
         res += self.cfs_matrix(self.y_test, self.y_pred)
 
         return res
@@ -47,10 +52,44 @@ class Evaluator(object):
         cm = confusion_matrix(y_test, y_pred)
         ans = 'confusion_matrix as follow: \n'
 
+        cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+
+        pic = Plot()
+        # pic.plot_cfs_matrix(cm, None, [1, 2])
+        pic.plot_cfs_matrix_sns(cm, None, [1, 2])
+
         for line in cm:
             ans += ' '.join((map(str, line)))
             ans += '\n'
 
+        ans += 'confusion_matrix_normalized as follow: \n'
+
+        for line in cm_normalized:
+            ans += ' '.join((map(str, line)))
+            ans += '\n'
+
         return ans
+
+    @staticmethod
+    def precision_recall_f1(y_true, y_pred, method='weighted'):
+        """
+        compute:
+            1. precision
+            2. recall
+            3. f1 score
+        :param y_pred:
+        :param y_true:
+        :param method: Weighting method
+            1. weighted
+            2. macro
+            3. micro
+        :return:
+        """
+
+        res = 'Weighted precision: {0:0.4f} \n'.format(precision_score(y_true, y_pred, average=method))
+        res += 'Weighted recall: {0:0.4f} \n'.format(recall_score(y_true, y_pred, average=method))
+        res += 'Weighted f1-score: {0:0.4f} \n'.format(f1_score(y_true, y_pred, average=method))
+
+        return res
 
 
