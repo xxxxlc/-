@@ -15,6 +15,8 @@ classify --> pre_recall_f1[查准率和查全率及F1--sklearn]
 pre_recall_f1 --> precision_score
 pre_recall_f1 --> recall_score
 pre_recall_f1 --> f1_score
+precision_score --> pr[PR图]
+recall_score --> pr
 ```
 
 
@@ -64,3 +66,16 @@ __查全率__
 
 #### PR图
 
+PR曲线是以查准率为纵坐标，以查全率为横坐标的曲线，以分类器判断该样本可能为正例（在多分类问题中为该类）的可能性作为依据进行排序，每次可以计算出当此的查全率、查准率，由此构成的曲线为PR曲线。
+
+![PR](https://github.com/xxxxlc/Machine-Learning/blob/main/ML_tensorflow/evaluator/img/PR-img-ZZH.png)
+
+通常PR曲线的面积越大，证明该分类器在该测试集上表现的越好，为了更好的度量PR曲线的优劣，提出了BHP度量方法
+
+BHP（Break-Event Point），简称平衡点，它是“查准率==查全率”时的取值
+
+
+
+#### F1
+
+F1则是基于查全率和查准率的综合性参数

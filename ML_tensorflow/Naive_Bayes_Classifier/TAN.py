@@ -63,7 +63,7 @@ class TAN(NBC):
             # compute P(y_i|c) posterior probability
             p_y_x[y_i] = self.posterior_prob(data, y_i)
 
-        return p_y_x[np.argmax(p_y_x)], np.argmax(p_y_x)
+        return p_y_x[np.argmax(p_y_x)], np.argmax(p_y_x), p_y_x
 
     def posterior_prob(self, data, y_c):
         """

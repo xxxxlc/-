@@ -16,6 +16,7 @@ class NBC(Trainer):
     """
     Base Classifier of Naive Bayes Classifier
     """
+
     def __init__(self, train_data, train_label, test_data=None, test_label=None, dis_index=None, cont_index=None):
         """
         build train and test dataset
@@ -156,9 +157,9 @@ class NBC(Trainer):
             # compute P(y_i|c) posterior probability
             p_y_x[y_i] = self.posterior_prob(data, y_i)
 
-        return p_y_x[np.argmax(p_y_x)], np.argmax(p_y_x)
+        return p_y_x[np.argmax(p_y_x)], np.argmax(p_y_x), p_y_x
 
-    def classify(self, data: list) -> list:
+    def classify(self, data: list) -> [list, list]:
         """
         return a group of data result of classification
         :param data:
@@ -166,10 +167,14 @@ class NBC(Trainer):
         """
         sample_num = data.shape[0]
         res = np.zeros((sample_num, 2))
-        for i in range(sample_num):
-            res[i, 0], res[i, 1] = self.argmax_p(data[i, :])
 
-        return res
+        # record all posterior probability
+        y_score = np.zeros((sample_num, self.Y_num))
+
+        for i in range(sample_num):
+            res[i, 0], res[i, 1], y_score[i, :] = self.argmax_p(data[i, :])
+
+        return res, y_score
 
     def test(self):
         """
@@ -211,15 +216,13 @@ class NBC(Trainer):
         return True
 
     @staticmethod
-    def evaluation(y_test, y_pred):
+    def evaluation(y_test, y_pred, y_score):
         """
         output evaluation of classifier
+        :param y_score: output probability
         :param y_test: ture label
         :param y_pred: predict label
         :return:
         """
-        evaluator = Evaluator(y_test, y_pred)
+        evaluator = Evaluator(y_test, y_pred, y_score)
         print(evaluator.classify_evaluation())
-
-
-

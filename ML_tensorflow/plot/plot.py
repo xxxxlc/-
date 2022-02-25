@@ -7,6 +7,9 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+from sklearn.metrics import precision_recall_curve
+from sklearn.metrics import average_precision_score
+
 
 class Plot(object):
     """
@@ -85,4 +88,27 @@ class Plot(object):
         plt.xticks(fontsize=18)
         plt.yticks(fontsize=18)
         plt.show()
+
+    @staticmethod
+    def plot_pr(y_true, y_scores):
+        """
+        draw P-R curve
+        :param y_true:
+        :param y_scores:
+        :return:
+        """
+
+        precision, recall, thresholds = precision_recall_curve(y_true, y_scores)
+
+        plt.figure("P-R Curve")
+        plt.title('Precision/Recall Curve')
+        plt.xlabel('Recall')
+        plt.ylabel('Precision')
+        plt.plot(recall, precision)
+        plt.show()
+
+        # # the area of PR curve and axis of x
+        # AP = average_precision_score(y_true, y_scores, average='macro', pos_label=1, sample_weight=None)
+
+
 

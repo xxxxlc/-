@@ -149,9 +149,15 @@ class Loader(object):
 
         return discrete, continuous
 
-
-
-
+    @staticmethod
+    def cleaner(data, trash=[None]):
+        """
+        return index of data which need remove
+        :param trash: need to remove
+        :param data:
+        :return:
+        """
+        pass
 
 
 if __name__ == "__main__":
